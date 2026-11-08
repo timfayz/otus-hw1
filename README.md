@@ -14,21 +14,21 @@ npm run typecheck
 
 ## Структура
 
-| Файл               | Что внутри                                                                                           |
-| ------------------ | ---------------------------------------------------------------------------------------------------- |
-| `src/errors.ts`    | `ApiHttpError { status, url, details? }`, `ApiValidationError { url, zodError }`                     |
-| `src/apiClient.ts` | класс `ApiClient`: baseURL, глобальные headers, метод `get`, сериализация query, объединение headers |
-| `src/schemas.ts`   | Zod-схемы эндпоинтов и типы через `z.infer` (без ручных интерфейсов)                                 |
-| `src/main.ts`      | демо всех возможностей                                                                               |
+| Файл               | Что внутри                                                                       |
+| ------------------ | -------------------------------------------------------------------------------- |
+| `src/errors.ts`    | `ApiHttpError { status, url, details? }`, `ApiValidationError { url, zodError }` |
+| `src/apiClient.ts` | класс `ApiClient`: baseURL, глобальные headers, метод `get`, сериализация query  |
+| `src/schemas.ts`   | Zod-схемы эндпоинтов и типы через `z.infer` (без ручных интерфейсов)             |
+| `src/main.ts`      | демо всех возможностей                                                           |
 
 ## Как работает
 
-- **Вывод типов**: `get(config)` возвращает `Promise<z.infer<S>>`, где `S` — схема ответа.
-  Тип query-параметров выводится условным типом:
-  `type QueryOf<Q> = Q extends z.ZodType ? z.infer<Q> : undefined` —
-  без `querySchema` передать `query` не даст сам компилятор.
+- **Вывод типов**: `get(config)` возвращает `Promise<z.infer<R>>`, где `R` —
+  схема response. Тип query-параметров выводится условным типом:
+  `type QueryOf<Q> = Q extends z.ZodType ? z.infer<Q> : undefined`,
+  где Q — схема query. Без `querySchema` передать `query` не даст сам компилятор.
 - **Ошибки**: `status >= 400` → `ApiHttpError`; провал `safeParse` → `ApiValidationError`.
-- **Опции**: возможность `signal: AbortSignal`, экспоненциальный retry при 5xx
+- **Опции**: возможность `signal: AbortSignal`, экспоненциальный retry при ошибках >= 5xx
   (`maxAttempts`, `baseDelay`), и кэш GET с TTL (`cacheTtlMs`).
 
 ## Пример

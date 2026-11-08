@@ -12,12 +12,13 @@ export interface ApiClientOptions {
   cacheTtlMs?: number;
 }
 
+/** R — схема response, Q — схема query */
 export interface GetConfig<
-  S extends z.ZodType,
+  R extends z.ZodType,
   Q extends z.ZodType | undefined = undefined,
 > {
   url: string;
-  responseSchema: S;
+  responseSchema: R;
   querySchema?: Q;
   query?: QueryOf<Q>;
   headers?: Record<string, string>;
@@ -43,10 +44,10 @@ export class ApiClient {
     this.cacheTtlMs = options.cacheTtlMs ?? 0;
   }
 
-  /** GET с валидацией; тип ответа выводится из responseSchema */
-  async get<S extends z.ZodType, Q extends z.ZodType | undefined = undefined>(
-    config: GetConfig<S, Q>,
-  ): Promise<z.infer<S>> {
+  /** GET с валидацией; тип ответа — z.infer<R> */
+  async get<R extends z.ZodType, Q extends z.ZodType | undefined = undefined>(
+    config: GetConfig<R, Q>,
+  ): Promise<z.infer<R>> {
     const { url, responseSchema, querySchema, query, headers, signal } = config;
 
     let queryString = "";
@@ -61,7 +62,7 @@ export class ApiClient {
 
     const cached = this.getCached(fullUrl);
     if (cached !== undefined) {
-      return cached as z.infer<S>;
+      return cached as z.infer<R>;
     }
 
     let lastError: unknown;
